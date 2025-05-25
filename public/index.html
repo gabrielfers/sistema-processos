@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sistema de Processos</title>
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Vue.js -->
+  <script src="https://cdn.jsdelivr.net/npm/vue@2.6.14/dist/vue.js"></script>
+  <!-- Axios para requisições HTTP -->
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+  <!-- CSS personalizado -->
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <div id="app">
+    <nav class="navbar navbar-dark bg-primary">
+      <div class="container-fluid">
+        <span class="navbar-brand mb-0 h1">Sistema de Processos</span>
+        <div>
+          <button @click="mostrarFormulario = !mostrarFormulario" class="btn btn-light">
+            {{ mostrarFormulario ? 'Voltar à Lista' : 'Novo Processo' }}
+          </button>
+        </div>
+      </div>
+    </nav>
+
+    <div class="container mt-4">
+      <!-- Formulário de cadastro/edição -->
+      <div v-if="mostrarFormulario" class="card">
+        <div class="card-header bg-primary text-white">
+          {{ processoSelecionado ? 'Editar Processo' : 'Novo Processo' }}
+        </div>
+        <div class="card-body">
+          <form @submit.prevent="salvarProcesso">
+            <div class="row">
+              <div class="col-md-4 mb-3">
+                <label for="numero_processo" class="form-label">Nº do Processo</label>
+                <input type="text" class="form-control" id="numero_processo" v-model="formProcesso.numero_processo" required>
+              </div>
+              <div class="col-md-4 mb-3">
+                <label for="data_entrada" class="form-label">Data de Entrada</label>
+                <input type="date" class="form-control" id="data_entrada" v-model="formProcesso.data_entrada">
+              </div>
+              <div class="col-md-4 mb-3">
+                <label for="competencia" class="form-label">Competência</label>
+                <input type="text" class="form-control" id="competencia" v-model="formProcesso.competencia">
+              </div>
+            </div>
+            
+            <div class="row">
+              <div class="col-md-6 mb-3">
+                <label for="objeto" class="form-label">Objeto</label>
+                <input type="text" class="form-control" id="objeto" v-model="formProcesso.objeto">
+              </div>
+              <div class="col-md-6 mb-3">
+                <label for="interessado" class="form-label">Interessado</label>
+                <input type="text" class="form-control" id="interessado" v-model="formProcesso.interessado">
+              </div>
+            </div>
+            
+            <div class="row">
+              <div class="col-md-4 mb-3">
+                <label for="orgao_gerador" class="form-label">Órgão Gerador</label>
+                <input type="text" class="form-control" id="orgao_gerador" v-model="formProcesso.orgao_gerador">
+              </div>
+              <div class="col-md-4 mb-3">
+                <label for="responsavel" class="form-label">Responsável</label>
+                <input type="text" class="form-control" id="responsavel" v-model="formProcesso.responsavel">
+              </div>
+              <div class="col-md-4 mb-3">
+                <label for="setor_atual" class="form-label">Setor Atual</label>
+                <input type="text" class="form-control" id="setor_atual" v-model="formProcesso.setor_atual">
+              </div>
+            </div>
+            
+            <div class="row">
+              <div class="col-md-6 mb-3">
+                <label for="despacho" class="form-label">Despacho</label>
+                <textarea class="form-control" id="despacho" v-model="formProcesso.despacho" rows="2"></textarea>
+              </div>
+              <div class="col-md-6 mb-3">
+                <label for="assinatura" class="form-label">Assinatura</label>
+                <input type="text" class="form-control" id="assinatura" v-model="formProcesso.assinatura">
+              </div>
+            </div>
+            
+            <div class="row">
+              <div class="col-md-12 mb-3">
+                <label for="observacao" class="form-label">Observação</label>
+                <textarea class="form-control" id="observacao" v-model="formProcesso.observacao" rows="2"></textarea>
+              </div>
+            </div>
+            
+            <div class="row">
+              <div class="col-md-6 mb-3">
+                <label for="valor_convenio" class="form-label">Valor Convênio (R$)</label>
+                <input type="number" step="0.01" min="0" class="form-control" id="valor_convenio" v-model="formProcesso.valor_convenio" placeholder="0,00">
+              </div>
+              <div class="col-md-6 mb-3">
+                <label for="valor_contrapartida" class="form-label">Valor Contrapartida (R$)</label>
+                <input type="number" step="0.01" min="0" class="form-control" id="valor_contrapartida" v-model="formProcesso.valor_contrapartida" placeholder="0,00">
+              </div>
+            </div>
+            
+            <div class="form-check mb-3">
+              <input class="form-check-input" type="checkbox" id="concluido" v-model="formProcesso.concluido">
+              <label class="form-check-label" for="concluido">
+                Processo concluído/Tramitado
+              </label>
+            </div>
+            
+            <div class="d-flex justify-content-between">
+              <button type="submit" class="btn btn-primary">Salvar</button>
+              <button type="button" class="btn btn-secondary" @click="limparFormulario">Limpar</button>
+              <button type="button" class="btn btn-danger" @click="mostrarFormulario = false">Cancelar</button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <!-- Lista de processos -->
+      <div v-else>
+        <div class="card mb-4">
+          <div class="card-header bg-primary text-white">
+            Busca de Processos
+          </div>
+          <div class="card-body">
+            <div class="input-group mb-3">
+              <input type="text" class="form-control" placeholder="Buscar processo..." v-model="termoBusca" @keyup.enter="buscarProcessos">
+              <button class="btn btn-primary" type="button" @click="buscarProcessos">Buscar</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="table-responsive">
+          <table class="table table-striped table-hover">
+            <thead>
+              <tr>
+                <th>Nº do Processo</th>
+                <th>Data Entrada</th>
+                <th>Interessado</th>
+                <th>Objeto</th>
+                <th>Setor Atual</th>
+                <th>Responsável</th>
+                <th>Status</th>
+                <th>Ações</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="processo in processos" :key="processo.id" :class="{ 'table-success': processo.concluido }">
+                <td>{{ processo.numero_processo }}</td>
+                <td>{{ formatarData(processo.data_entrada) }}</td>
+                <td>{{ processo.interessado }}</td>
+                <td>{{ processo.objeto }}</td>
+                <td>{{ processo.setor_atual }}</td>
+                <td>{{ processo.responsavel }}</td>
+                <td>
+                  <span v-if="processo.concluido" class="badge bg-success">Concluído</span>
+                  <span v-else class="badge bg-warning text-dark">Em andamento</span>
+                </td>
+                <td>
+                  <button @click="editarProcesso(processo)" class="btn btn-sm btn-primary me-1">Editar</button>
+                  <button @click="excluirProcesso(processo.id)" class="btn btn-sm btn-danger">Excluir</button>
+                </td>
+              </tr>
+              <tr v-if="processos.length === 0">
+                <td colspan="8" class="text-center">Nenhum processo encontrado</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="/js/app.js"></script>
+</body>
+</html>
