@@ -1,21 +1,34 @@
 :root {
-    --primary-color: #4f46e5;
-    --primary-dark: #3730a3;
-    --secondary-color: #06b6d4;
-    --success-color: #10b981;
-    --warning-color: #f59e0b;
-    --danger-color: #ef4444;
-    --gray-50: #f8fafc;
+    /* Nova paleta de cores baseada na logo Arquiva+ */
+    --primary-color: #4834c5; /* Roxo mais profundo */
+    --primary-dark: #3729a3;  /* Roxo mais escuro */
+    --secondary-color: #95c93d; /* Verde da logo */
+    --secondary-dark: #82b32e; /* Verde mais escuro */
+    --accent-color: #68abfe; /* Azul para detalhes */
+    
+    /* Cores de estado */
+    --success-color: #3db580; 
+    --warning-color: #f59e0b; 
+    --danger-color: #dc2c2c;
+    
+    /* Escala de cinzas */
+    --gray-50: #f9fafc;
     --gray-100: #f1f5f9;
     --gray-200: #e2e8f0;
     --gray-300: #cbd5e1;
+    --gray-400: #94a3b8;
+    --gray-500: #64748b;
     --gray-600: #475569;
+    --gray-700: #334155;
     --gray-800: #1e293b;
-    --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+    --gray-900: #0f172a;
+    
+    /* Sombras e bordas */
+    --shadow-sm: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
     --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
     --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
-    --border-radius: 12px;
-    --border-radius-sm: 8px;
+    --border-radius: 10px;
+    --border-radius-sm: 6px;
     --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   }
   
@@ -30,9 +43,9 @@
     line-height: 1.6;
   }
   
-  /* Navbar melhorado */
+  /* Navbar melhorado com cores neutras para destacar a logo */
   .navbar {
-    background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%) !important;
+    background: linear-gradient(135deg, var(--gray-800) 0%, var(--gray-900) 100%) !important;
     box-shadow: var(--shadow-lg);
     padding: 1rem 0;
     border-bottom: 3px solid rgba(255, 255, 255, 0.1);
@@ -43,16 +56,19 @@
     font-size: 1.5rem;
     text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
     transition: var(--transition);
+    padding: 0.25rem 0.5rem;
+    border-radius: var(--border-radius-sm);
   }
   
   .navbar-brand:hover {
     transform: translateY(-1px);
+    background-color: rgba(255, 255, 255, 0.05);
   }
   
-  /* Logo PNG dos assets */
+  /* Logo PNG com mais destaque */
   .navbar-brand .logo {
     transition: var(--transition);
-    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
+    filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.2));
     height: 50px;
     width: auto;
     max-width: 250px;
@@ -119,7 +135,7 @@
   
   /* Remover animações antigas do SVG inline */
   
-  /* Cards modernos */
+  /* Cards modernos com cores da marca */
   .card {
     border: none;
     border-radius: var(--border-radius);
@@ -135,11 +151,12 @@
   }
   
   .card-header {
-    background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%) !important;
+    background: linear-gradient(135deg, var(--gray-700) 0%, var(--gray-800) 100%) !important;
     border: none;
     padding: 1.25rem 1.5rem;
     font-weight: 600;
     font-size: 1.1rem;
+    color: white;
     text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
   }
   
@@ -168,7 +185,7 @@
   
   .form-control:focus, select.form-control:focus {
     border-color: var(--primary-color);
-    box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+    box-shadow: 0 0 0 3px rgba(72, 52, 197, 0.1);
     outline: none;
   }
   
@@ -176,7 +193,7 @@
     border-color: var(--gray-300);
   }
   
-  /* Botões modernos */
+  /* Botões modernos com cores coordenadas */
   .btn {
     border-radius: var(--border-radius-sm);
     padding: 0.75rem 1.5rem;
@@ -201,16 +218,24 @@
     transform: translateY(-1px);
   }
   
+  /* Botão verde secundário que combina com logo */
   .btn-secondary {
-    background: linear-gradient(135deg, var(--gray-600) 0%, var(--gray-800) 100%);
+    background: linear-gradient(135deg, var(--secondary-color) 0%, var(--secondary-dark) 100%);
+    color: white;
+  }
+  
+  .btn-secondary:hover {
+    background: linear-gradient(135deg, var(--secondary-dark) 0%, var(--secondary-color) 100%);
+    box-shadow: var(--shadow-md);
+    transform: translateY(-1px);
   }
   
   .btn-danger {
-    background: linear-gradient(135deg, var(--danger-color) 0%, #dc2626 100%);
+    background: linear-gradient(135deg, var(--danger-color) 0%, #c41d1d 100%);
   }
   
   .btn-success {
-    background: linear-gradient(135deg, var(--success-color) 0%, #059669 100%);
+    background: linear-gradient(135deg, var(--success-color) 0%, #2d9c69 100%);
   }
   
   .btn-warning {
@@ -230,7 +255,7 @@
     transform: translateY(-1px);
   }
   
-  /* Tabela melhorada */
+  /* Tabela melhorada com cores mais formais */
   .table-responsive {
     border-radius: var(--border-radius);
     box-shadow: var(--shadow-md);
@@ -243,20 +268,34 @@
   }
   
   .table th {
-    background: linear-gradient(135deg, var(--gray-50) 0%, var(--gray-100) 100%);
+    background: var(--gray-50);
     border: none;
-    font-weight: 700;
-    color: var(--gray-600);
-    padding: 1.25rem 1rem;
-    font-size: 0.8rem;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
+    border-bottom: 2px solid var(--gray-200);
+    border-right: 1px solid var(--gray-200);
+    font-weight: 600;
+    color: var(--gray-700);
+    padding: 1rem 1rem;
+    font-size: 0.875rem;
+    text-transform: none;
+    letter-spacing: normal;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+  }
+  
+  .table th:last-child {
+    border-right: none;
   }
   
   .table td {
     padding: 1rem;
     border-color: var(--gray-100);
+    border-right: 1px solid var(--gray-100);
     vertical-align: middle;
+  }
+  
+  .table td:last-child {
+    border-right: none;
   }
   
   .table-striped > tbody > tr:nth-of-type(odd) > td {
@@ -264,14 +303,14 @@
   }
   
   .table-hover > tbody > tr:hover > td {
-    background-color: rgba(79, 70, 229, 0.05);
+    background-color: rgba(72, 52, 197, 0.05);
   }
   
   .table-success {
-    background: linear-gradient(135deg, rgba(16, 185, 129, 0.1) 0%, rgba(5, 150, 105, 0.1) 100%) !important;
+    background: linear-gradient(135deg, rgba(61, 181, 128, 0.1) 0%, rgba(45, 156, 105, 0.1) 100%) !important;
   }
   
-  /* Badges modernos */
+  /* Badges modernos com cores da marca */
   .badge {
     font-size: 0.75rem;
     padding: 0.5rem 0.75rem;
@@ -282,11 +321,15 @@
   }
   
   .bg-success {
-    background: linear-gradient(135deg, var(--success-color) 0%, #059669 100%) !important;
+    background: linear-gradient(135deg, var(--success-color) 0%, #2d9c69 100%) !important;
   }
   
   .bg-warning {
     background: linear-gradient(135deg, var(--warning-color) 0%, #d97706 100%) !important;
+  }
+  
+  .bg-info {
+    background: linear-gradient(135deg, var(--accent-color) 0%, #4884e3 100%) !important;
   }
   
   /* Dropdown customizado */
@@ -308,7 +351,7 @@
   }
   
   .dropdown-item:hover {
-    background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+    background: linear-gradient(135deg, var(--gray-800) 0%, var(--gray-900) 100%);
     color: white;
     transform: translateX(4px);
   }
@@ -340,11 +383,11 @@
   }
   
   .input-group .btn:hover {
-    background: var(--primary-color);
+    background: var(--gray-800);
     color: white;
   }
   
-  /* Seções do formulário */
+  /* Seções do formulário modernizadas */
   .form-section {
     background: var(--gray-50);
     border-radius: var(--border-radius);
@@ -353,8 +396,12 @@
     border-left: 4px solid var(--primary-color);
   }
   
+  .form-section:nth-child(even) {
+    border-left: 4px solid var(--secondary-color);
+  }
+  
   .form-section h5 {
-    color: var(--primary-color);
+    color: var(--gray-800);
     font-weight: 700;
     margin-bottom: 1.5rem;
     font-size: 1.1rem;
@@ -432,10 +479,11 @@
     background-color: var(--gray-100);
   }
   
-  /* Filtros */
+  /* Estilos dos filtros aprimorados */
 .btn-outline-light:hover {
-  background-color: rgba(255, 255, 255, 0.1);
+  background-color: rgba(255, 255, 255, 0.15);
   border-color: rgba(255, 255, 255, 0.3);
+  color: white;
 }
 
 .badge {
@@ -454,8 +502,9 @@
 
 /* Indicadores de filtros ativos */
 .badge.bg-info {
-  background: linear-gradient(135deg, var(--secondary-color) 0%, var(--primary-color) 100%) !important;
+  background: linear-gradient(135deg, var(--accent-color) 0%, #4884e3 100%) !important;
   color: white;
+  box-shadow: 0 2px 4px rgba(72, 132, 227, 0.2);
 }
 
 /* Animação suave para mostrar/ocultar filtros */
@@ -484,4 +533,33 @@
   .form-control-sm {
     font-size: 0.875rem;
   }
+}
+
+/* Estilização adicional para status de processo */
+.badge.bg-success {
+  background: linear-gradient(135deg, var(--success-color) 0%, #2d9c69 100%) !important;
+  box-shadow: 0 2px 4px rgba(61, 181, 128, 0.2);
+}
+
+.badge.bg-warning {
+  background: linear-gradient(135deg, var(--warning-color) 0%, #d97706 100%) !important;
+  box-shadow: 0 2px 4px rgba(245, 158, 11, 0.2);
+}
+
+/* Botões de ação na tabela */
+.table .btn-sm {
+  padding: 0.4rem 0.8rem;
+  font-size: 0.75rem;
+}
+
+.table .btn-primary {
+  background: linear-gradient(135deg, var(--gray-800) 0%, var(--gray-900) 90%);
+}
+
+.table .btn-primary:hover {
+  background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 90%);
+}
+
+.table .btn-danger {
+  background: linear-gradient(135deg, var(--danger-color) 0%, #c41d1d 90%);
 }
