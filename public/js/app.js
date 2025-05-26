@@ -66,7 +66,7 @@ new Vue({
     },
     objetosFiltrados() {
       if (!this.buscaObjeto) return this.objetos;
-      return this.objetos.filter(objeto => 
+      return this.objetos.filter(objeto =>
         objeto.toLowerCase().includes(this.buscaObjeto.toLowerCase())
       );
     },
@@ -95,7 +95,7 @@ new Vue({
   methods: {
     async carregarProcessos() {
       try {
-        let url = '/api/processos';
+        let url = 'http://localhost:3000/processos';
         const params = new URLSearchParams();
 
         // Adicionar busca se existir
@@ -124,7 +124,7 @@ new Vue({
 
     async carregarCompetencias() {
       try {
-        const response = await axios.get('/api/processos');
+        const response = await axios.get('http://localhost:3000/processos');
         const competencias = [...new Set(response.data
           .map(p => p.competencia)
           .filter(c => c && c.trim() !== '')
@@ -163,14 +163,14 @@ new Vue({
 
         if (this.processoSelecionado) {
           // Editar processo existente
-          await axios.put(`/api/processos/${this.processoSelecionado.id}`, dadosProcesso);
+          await axios.put(`http://localhost:3000/processos/${this.processoSelecionado.id}`, dadosProcesso);
           alert('Processo atualizado com sucesso!');
         } else {
           // Criar novo processo
-          await axios.post('/api/processos', dadosProcesso);
+          await axios.post('http://localhost:3000/processos', dadosProcesso);
           alert('Processo cadastrado com sucesso!');
         }
-        
+
         this.limparFormulario();
         this.mostrarFormulario = false;
         await this.carregarProcessos();
@@ -181,11 +181,11 @@ new Vue({
         } else if (error.message) {
           mensagemErro = error.message;
         }
-        
+
         alert('Erro ao salvar processo: ' + mensagemErro);
       }
     },
-    
+
     editarProcesso(processo) {
       this.processoSelecionado = processo;
       this.formProcesso = {
@@ -207,11 +207,11 @@ new Vue({
       };
       this.mostrarFormulario = true;
     },
-    
+
     async excluirProcesso(id) {
       if (confirm('Tem certeza que deseja excluir este processo?')) {
         try {
-          await axios.delete(`/api/processos/${id}`);
+          await axios.delete(`http://localhost:3000/processos/${id}`);
           alert('Processo excluído com sucesso!');
           await this.carregarProcessos();
         } catch (error) {
@@ -219,7 +219,7 @@ new Vue({
         }
       }
     },
-    
+
     aplicarFiltros() {
       this.carregarProcessos();
     },
@@ -242,13 +242,13 @@ new Vue({
     buscarProcessos() {
       this.carregarProcessos();
     },
-    
+
     selecionarObjeto(objeto) {
       this.formProcesso.objeto = objeto;
       this.buscaObjeto = '';
       this.mostrarOpcoesObjeto = false;
     },
-    
+
     toggleOpcoesObjeto() {
       this.mostrarOpcoesObjeto = !this.mostrarOpcoesObjeto;
       if (this.mostrarOpcoesObjeto) {
@@ -257,7 +257,7 @@ new Vue({
         });
       }
     },
-    
+
     limparFormulario() {
       this.formProcesso = {
         numero_processo: '',
@@ -280,13 +280,13 @@ new Vue({
       this.buscaObjeto = '';
       this.mostrarOpcoesObjeto = false;
     },
-    
+
     formatarData(data) {
       if (!data) return '';
       const date = new Date(data);
       return date.toLocaleDateString('pt-BR');
     },
-    
+
     handleLogoError() {
       this.logoError = true;
     }
