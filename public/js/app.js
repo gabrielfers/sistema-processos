@@ -5,6 +5,26 @@ new Vue({
     mostrarFormulario: false,
     processoSelecionado: null,
     termoBusca: '',
+    setores: ['Gabinete', 'Contabilidade', 'Controle Interno', 'Financeiro'],
+    objetos: [
+      'Adiantamento',
+      'Aluguel Imóveis',
+      'Aluguel Veículos',
+      'Carnaval',
+      'Combustível',
+      'Contas Pagamentos',
+      'Convênios',
+      'Diárias',
+      'Dotação',
+      'Eventos/Comunicação',
+      'Fundações',
+      'Obras',
+      'Premiações Mestre Antônio',
+      'Premiações Mestre Eduardo',
+      'Softwares e Consultoria'
+    ],
+    buscaObjeto: '',
+    mostrarOpcoesObjeto: false,
     formProcesso: {
       numero_processo: '',
       data_entrada: '',
@@ -14,23 +34,48 @@ new Vue({
       orgao_gerador: '',
       responsavel: '',
       setor_atual: '',
-      despacho: '',
-      assinatura: '',
+      descricao: '',
       observacao: '',
       valor_convenio: '',
-      valor_contrapartida: '',
+      valor_recurso_proprio: '',
+      valor_royalties: '',
+      total: 0,
       concluido: false
+    }
+  },
+  computed: {
+    totalCalculado() {
+      const convenio = parseFloat(this.formProcesso.valor_convenio) || 0;
+      const recursoProprio = parseFloat(this.formProcesso.valor_recurso_proprio) || 0;
+      const royalties = parseFloat(this.formProcesso.valor_royalties) || 0;
+      return convenio + recursoProprio + royalties;
+    },
+    objetosFiltrados() {
+      if (!this.buscaObjeto) return this.objetos;
+      return this.objetos.filter(objeto => 
+        objeto.toLowerCase().includes(this.buscaObjeto.toLowerCase())
+      );
+    }
+  },
+  watch: {
+    totalCalculado(newVal) {
+      this.formProcesso.total = newVal;
     }
   },
   mounted() {
     this.carregarProcessos();
+    // Fechar dropdown ao clicar fora
+    document.addEventListener('click', (e) => {
+      if (!this.$refs.objetoContainer || !this.$refs.objetoContainer.contains(e.target)) {
+        this.mostrarOpcoesObjeto = false;
+      }
+    });
   },
   methods: {
     async carregarProcessos() {
       try {
         const response = await axios.get('/api/processos');
         this.processos = response.data;
-        console.log('Processos carregados:', this.processos.length);
       } catch (error) {
         console.error('Erro ao carregar processos:', error);
         alert('Erro ao carregar processos: ' + (error.response?.data?.error || error.message));
@@ -55,15 +100,13 @@ new Vue({
           orgao_gerador: this.formProcesso.orgao_gerador || '',
           responsavel: this.formProcesso.responsavel || '',
           setor_atual: this.formProcesso.setor_atual || '',
-          despacho: this.formProcesso.despacho || '',
-          assinatura: this.formProcesso.assinatura || '',
+          descricao: this.formProcesso.descricao || '',
           observacao: this.formProcesso.observacao || '',
           valor_convenio: this.formProcesso.valor_convenio ? parseFloat(this.formProcesso.valor_convenio) : 0,
-          valor_contrapartida: this.formProcesso.valor_contrapartida ? parseFloat(this.formProcesso.valor_contrapartida) : 0,
+          valor_recurso_proprio: this.formProcesso.valor_recurso_proprio ? parseFloat(this.formProcesso.valor_recurso_proprio) : 0,
+          valor_royalties: this.formProcesso.valor_royalties ? parseFloat(this.formProcesso.valor_royalties) : 0,
           concluido: this.formProcesso.concluido || false
         };
-
-        console.log('Enviando dados:', dadosProcesso);
 
         if (this.processoSelecionado) {
           // Editar processo existente
@@ -79,15 +122,9 @@ new Vue({
         this.mostrarFormulario = false;
         await this.carregarProcessos();
       } catch (error) {
-        console.error('Erro completo:', error);
-        console.error('Response data:', error.response?.data);
-        
         let mensagemErro = 'Erro desconhecido';
         if (error.response?.data?.error) {
           mensagemErro = error.response.data.error;
-          if (error.response.data.details) {
-            mensagemErro += ': ' + error.response.data.details;
-          }
         } else if (error.message) {
           mensagemErro = error.message;
         }
@@ -107,11 +144,12 @@ new Vue({
         orgao_gerador: processo.orgao_gerador || '',
         responsavel: processo.responsavel || '',
         setor_atual: processo.setor_atual || '',
-        despacho: processo.despacho || '',
-        assinatura: processo.assinatura || '',
+        descricao: processo.descricao || '',
         observacao: processo.observacao || '',
         valor_convenio: processo.valor_convenio || '',
-        valor_contrapartida: processo.valor_contrapartida || '',
+        valor_recurso_proprio: processo.valor_recurso_proprio || '',
+        valor_royalties: processo.valor_royalties || '',
+        total: processo.total || 0,
         concluido: processo.concluido || false
       };
       this.mostrarFormulario = true;
@@ -124,7 +162,6 @@ new Vue({
           alert('Processo excluído com sucesso!');
           await this.carregarProcessos();
         } catch (error) {
-          console.error('Erro ao excluir processo:', error);
           alert('Erro ao excluir processo: ' + (error.response?.data?.error || error.message));
         }
       }
@@ -139,8 +176,22 @@ new Vue({
         const response = await axios.get(url);
         this.processos = response.data;
       } catch (error) {
-        console.error('Erro ao buscar processos:', error);
         alert('Erro ao buscar processos: ' + (error.response?.data?.error || error.message));
+      }
+    },
+    
+    selecionarObjeto(objeto) {
+      this.formProcesso.objeto = objeto;
+      this.buscaObjeto = '';
+      this.mostrarOpcoesObjeto = false;
+    },
+    
+    toggleOpcoesObjeto() {
+      this.mostrarOpcoesObjeto = !this.mostrarOpcoesObjeto;
+      if (this.mostrarOpcoesObjeto) {
+        this.$nextTick(() => {
+          this.$refs.buscaObjetoInput?.focus();
+        });
       }
     },
     
@@ -154,14 +205,17 @@ new Vue({
         orgao_gerador: '',
         responsavel: '',
         setor_atual: '',
-        despacho: '',
-        assinatura: '',
+        descricao: '',
         observacao: '',
         valor_convenio: '',
-        valor_contrapartida: '',
+        valor_recurso_proprio: '',
+        valor_royalties: '',
+        total: 0,
         concluido: false
       };
       this.processoSelecionado = null;
+      this.buscaObjeto = '';
+      this.mostrarOpcoesObjeto = false;
     },
     
     formatarData(data) {

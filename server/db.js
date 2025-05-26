@@ -18,8 +18,7 @@ db.serialize(() => {
       interessado TEXT,
       orgao_gerador TEXT,
       responsavel TEXT,
-      despacho TEXT,
-      assinatura TEXT,
+      descricao TEXT,
       concluido INTEGER DEFAULT 0,
       setor_atual TEXT,
       observacao TEXT,
@@ -36,19 +35,31 @@ db.serialize(() => {
 
     const columnNames = columns.map(col => col.name);
     
+    // Adiciona descricao se não existir
+    if (!columnNames.includes('descricao')) {
+      db.run("ALTER TABLE processos ADD COLUMN descricao TEXT DEFAULT ''", (err) => {
+        if (err) console.error('Erro ao adicionar coluna descricao:', err);
+      });
+    }
+
     // Adiciona valor_convenio se não existir
     if (!columnNames.includes('valor_convenio')) {
       db.run("ALTER TABLE processos ADD COLUMN valor_convenio REAL DEFAULT 0", (err) => {
         if (err) console.error('Erro ao adicionar coluna valor_convenio:', err);
-        else console.log('Coluna valor_convenio adicionada com sucesso');
       });
     }
 
-    // Adiciona valor_contrapartida se não existir
-    if (!columnNames.includes('valor_contrapartida')) {
-      db.run("ALTER TABLE processos ADD COLUMN valor_contrapartida REAL DEFAULT 0", (err) => {
-        if (err) console.error('Erro ao adicionar coluna valor_contrapartida:', err);
-        else console.log('Coluna valor_contrapartida adicionada com sucesso');
+    // Adiciona valor_recurso_proprio se não existir
+    if (!columnNames.includes('valor_recurso_proprio')) {
+      db.run("ALTER TABLE processos ADD COLUMN valor_recurso_proprio REAL DEFAULT 0", (err) => {
+        if (err) console.error('Erro ao adicionar coluna valor_recurso_proprio:', err);
+      });
+    }
+
+    // Adiciona valor_royalties se não existir
+    if (!columnNames.includes('valor_royalties')) {
+      db.run("ALTER TABLE processos ADD COLUMN valor_royalties REAL DEFAULT 0", (err) => {
+        if (err) console.error('Erro ao adicionar coluna valor_royalties:', err);
       });
     }
 
@@ -56,7 +67,6 @@ db.serialize(() => {
     if (!columnNames.includes('total')) {
       db.run("ALTER TABLE processos ADD COLUMN total REAL DEFAULT 0", (err) => {
         if (err) console.error('Erro ao adicionar coluna total:', err);
-        else console.log('Coluna total adicionada com sucesso');
       });
     }
   });

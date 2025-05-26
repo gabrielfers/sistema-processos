@@ -30,8 +30,6 @@ router.get('/', (req, res) => {
 
 // POST - Criar novo processo
 router.post('/', (req, res) => {
-  console.log('Dados recebidos:', req.body); // Log para debug
-  
   const {
     numero_processo,
     data_entrada,
@@ -41,11 +39,11 @@ router.post('/', (req, res) => {
     orgao_gerador,
     responsavel,
     setor_atual,
-    despacho,
-    assinatura,
+    descricao,
     observacao,
     valor_convenio,
-    valor_contrapartida,
+    valor_recurso_proprio,
+    valor_royalties,
     concluido
   } = req.body;
 
@@ -67,15 +65,16 @@ router.post('/', (req, res) => {
 
     // Sanitizar e converter valores
     const valorConvenio = valor_convenio ? parseFloat(valor_convenio) : 0;
-    const valorContrapartida = valor_contrapartida ? parseFloat(valor_contrapartida) : 0;
-    const total = valorConvenio + valorContrapartida;
+    const valorRecursoProprio = valor_recurso_proprio ? parseFloat(valor_recurso_proprio) : 0;
+    const valorRoyalties = valor_royalties ? parseFloat(valor_royalties) : 0;
+    const total = valorConvenio + valorRecursoProprio + valorRoyalties;
     const data_atualizacao = new Date().toISOString();
     const dataEntrada = data_entrada || new Date().toISOString().split('T')[0];
 
     const sql = `INSERT INTO processos (
       numero_processo, data_entrada, competencia, objeto, interessado,
-      orgao_gerador, responsavel, setor_atual, despacho, assinatura,
-      observacao, valor_convenio, valor_contrapartida, total,
+      orgao_gerador, responsavel, setor_atual, descricao,
+      observacao, valor_convenio, valor_recurso_proprio, valor_royalties, total,
       concluido, data_atualizacao
     ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
 
@@ -88,28 +87,23 @@ router.post('/', (req, res) => {
       orgao_gerador || '',
       responsavel || '',
       setor_atual || '',
-      despacho || '',
-      assinatura || '',
+      descricao || '',
       observacao || '',
       valorConvenio,
-      valorContrapartida,
+      valorRecursoProprio,
+      valorRoyalties,
       total,
       concluido ? 1 : 0,
       data_atualizacao
     ];
 
-    console.log('Executando SQL:', sql);
-    console.log('Parâmetros:', params);
-
     db.run(sql, params, function(err) {
       if (err) {
-        console.error('Erro detalhado ao criar processo:', err);
+        console.error('Erro ao criar processo:', err);
         return res.status(500).json({ 
-          error: 'Erro ao criar processo', 
-          details: err.message 
+          error: 'Erro ao criar processo'
         });
       }
-      console.log('Processo criado com ID:', this.lastID);
       res.status(201).json({ 
         id: this.lastID, 
         message: 'Processo criado com sucesso' 
@@ -121,8 +115,6 @@ router.post('/', (req, res) => {
 // PUT - Atualizar processo
 router.put('/:id', (req, res) => {
   const { id } = req.params;
-  console.log('Atualizando processo ID:', id);
-  console.log('Dados recebidos:', req.body);
   
   const {
     numero_processo,
@@ -133,11 +125,11 @@ router.put('/:id', (req, res) => {
     orgao_gerador,
     responsavel,
     setor_atual,
-    despacho,
-    assinatura,
+    descricao,
     observacao,
     valor_convenio,
-    valor_contrapartida,
+    valor_recurso_proprio,
+    valor_royalties,
     concluido
   } = req.body;
 
@@ -148,15 +140,16 @@ router.put('/:id', (req, res) => {
 
   // Sanitizar e converter valores
   const valorConvenio = valor_convenio ? parseFloat(valor_convenio) : 0;
-  const valorContrapartida = valor_contrapartida ? parseFloat(valor_contrapartida) : 0;
-  const total = valorConvenio + valorContrapartida;
+  const valorRecursoProprio = valor_recurso_proprio ? parseFloat(valor_recurso_proprio) : 0;
+  const valorRoyalties = valor_royalties ? parseFloat(valor_royalties) : 0;
+  const total = valorConvenio + valorRecursoProprio + valorRoyalties;
   const data_atualizacao = new Date().toISOString();
 
   const sql = `UPDATE processos SET
     numero_processo = ?, data_entrada = ?, competencia = ?, objeto = ?,
     interessado = ?, orgao_gerador = ?, responsavel = ?, setor_atual = ?,
-    despacho = ?, assinatura = ?, observacao = ?, valor_convenio = ?,
-    valor_contrapartida = ?, total = ?, concluido = ?, data_atualizacao = ?
+    descricao = ?, observacao = ?, valor_convenio = ?,
+    valor_recurso_proprio = ?, valor_royalties = ?, total = ?, concluido = ?, data_atualizacao = ?
     WHERE id = ?`;
 
   const params = [
@@ -168,11 +161,11 @@ router.put('/:id', (req, res) => {
     orgao_gerador || '',
     responsavel || '',
     setor_atual || '',
-    despacho || '',
-    assinatura || '',
+    descricao || '',
     observacao || '',
     valorConvenio,
-    valorContrapartida,
+    valorRecursoProprio,
+    valorRoyalties,
     total,
     concluido ? 1 : 0,
     data_atualizacao,
@@ -183,14 +176,12 @@ router.put('/:id', (req, res) => {
     if (err) {
       console.error('Erro ao atualizar processo:', err);
       return res.status(500).json({ 
-        error: 'Erro ao atualizar processo',
-        details: err.message 
+        error: 'Erro ao atualizar processo'
       });
     }
     if (this.changes === 0) {
       return res.status(404).json({ error: 'Processo não encontrado' });
     }
-    console.log('Processo atualizado com sucesso');
     res.json({ message: 'Processo atualizado com sucesso' });
   });
 });

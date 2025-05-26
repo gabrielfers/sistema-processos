@@ -52,7 +52,51 @@
             <div class="row">
               <div class="col-md-6 mb-3">
                 <label for="objeto" class="form-label">Objeto</label>
-                <input type="text" class="form-control" id="objeto" v-model="formProcesso.objeto">
+                <div class="position-relative" ref="objetoContainer">
+                  <div class="input-group">
+                    <input 
+                      type="text" 
+                      class="form-control" 
+                      id="objeto" 
+                      v-model="formProcesso.objeto" 
+                      readonly
+                      @click="toggleOpcoesObjeto"
+                      placeholder="Selecione um objeto..."
+                    >
+                    <button 
+                      type="button" 
+                      class="btn btn-outline-secondary"
+                      @click="toggleOpcoesObjeto"
+                    >
+                      ⌄
+                    </button>
+                  </div>
+                  
+                  <div v-if="mostrarOpcoesObjeto" class="dropdown-menu show w-100 mt-1" style="max-height: 300px; overflow-y: auto;">
+                    <div class="px-3 py-2">
+                      <input 
+                        type="text" 
+                        class="form-control form-control-sm" 
+                        placeholder="Buscar objeto..."
+                        v-model="buscaObjeto"
+                        ref="buscaObjetoInput"
+                      >
+                    </div>
+                    <div class="dropdown-divider"></div>
+                    <button 
+                      type="button"
+                      class="dropdown-item"
+                      v-for="objeto in objetosFiltrados"
+                      :key="objeto"
+                      @click="selecionarObjeto(objeto)"
+                    >
+                      {{ objeto }}
+                    </button>
+                    <div v-if="objetosFiltrados.length === 0" class="dropdown-item-text text-muted">
+                      Nenhum objeto encontrado
+                    </div>
+                  </div>
+                </div>
               </div>
               <div class="col-md-6 mb-3">
                 <label for="interessado" class="form-label">Interessado</label>
@@ -71,18 +115,17 @@
               </div>
               <div class="col-md-4 mb-3">
                 <label for="setor_atual" class="form-label">Setor Atual</label>
-                <input type="text" class="form-control" id="setor_atual" v-model="formProcesso.setor_atual">
+                <select class="form-control" id="setor_atual" v-model="formProcesso.setor_atual">
+                  <option value="">Selecione um setor</option>
+                  <option v-for="setor in setores" :key="setor" :value="setor">{{ setor }}</option>
+                </select>
               </div>
             </div>
             
             <div class="row">
-              <div class="col-md-6 mb-3">
-                <label for="despacho" class="form-label">Despacho</label>
-                <textarea class="form-control" id="despacho" v-model="formProcesso.despacho" rows="2"></textarea>
-              </div>
-              <div class="col-md-6 mb-3">
-                <label for="assinatura" class="form-label">Assinatura</label>
-                <input type="text" class="form-control" id="assinatura" v-model="formProcesso.assinatura">
+              <div class="col-md-12 mb-3">
+                <label for="descricao" class="form-label">Descrição</label>
+                <textarea class="form-control" id="descricao" v-model="formProcesso.descricao" rows="2"></textarea>
               </div>
             </div>
             
@@ -94,13 +137,21 @@
             </div>
             
             <div class="row">
-              <div class="col-md-6 mb-3">
+              <div class="col-md-3 mb-3">
                 <label for="valor_convenio" class="form-label">Valor Convênio (R$)</label>
                 <input type="number" step="0.01" min="0" class="form-control" id="valor_convenio" v-model="formProcesso.valor_convenio" placeholder="0,00">
               </div>
-              <div class="col-md-6 mb-3">
-                <label for="valor_contrapartida" class="form-label">Valor Contrapartida (R$)</label>
-                <input type="number" step="0.01" min="0" class="form-control" id="valor_contrapartida" v-model="formProcesso.valor_contrapartida" placeholder="0,00">
+              <div class="col-md-3 mb-3">
+                <label for="valor_recurso_proprio" class="form-label">Valor Recurso Próprio (R$)</label>
+                <input type="number" step="0.01" min="0" class="form-control" id="valor_recurso_proprio" v-model="formProcesso.valor_recurso_proprio" placeholder="0,00">
+              </div>
+              <div class="col-md-3 mb-3">
+                <label for="valor_royalties" class="form-label">Valor Royalties (R$)</label>
+                <input type="number" step="0.01" min="0" class="form-control" id="valor_royalties" v-model="formProcesso.valor_royalties" placeholder="0,00">
+              </div>
+              <div class="col-md-3 mb-3">
+                <label for="total" class="form-label">Total (R$)</label>
+                <input type="number" step="0.01" class="form-control" id="total" :value="totalCalculado.toFixed(2)" readonly>
               </div>
             </div>
             
