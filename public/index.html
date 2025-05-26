@@ -4,6 +4,10 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Sistema de Processos</title>
+  <!-- Favicon -->
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHZpZXdCb3g9IjAgMCAzMiAzMiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjMyIiBoZWlnaHQ9IjMyIiByeD0iOCIgZmlsbD0iIzRmNDZlNSIvPgo8cGF0aCBkPSJNOCA4aDEwdjJIOHptMCA0aDE2djJIOHptMCA0aDE0djJIOHptMCA0aDEydjJIOFoiIGZpbGw9IndoaXRlIi8+CjxjaXJjbGUgY3g9IjI0IiBjeT0iMjQiIHI9IjQiIGZpbGw9IiMwNmI2ZDQiLz4KPC9zdmc+">
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <!-- Bootstrap CSS -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
   <!-- Vue.js -->
@@ -15,157 +19,216 @@
 </head>
 <body>
   <div id="app">
-    <nav class="navbar navbar-dark bg-primary">
-      <div class="container-fluid">
-        <span class="navbar-brand mb-0 h1">Sistema de Processos</span>
+    <nav class="navbar navbar-dark">
+      <div class="container">
+        <div class="navbar-brand mb-0 h1 d-flex align-items-center">
+          <!-- Logo PNG dos assets -->
+          <img 
+            src="/assets/Arquiva+Logo.png" 
+            alt="Sistema de Processos" 
+            class="logo"
+            @error="handleLogoError"
+            v-if="!logoError"
+          >
+          <!-- Fallback se logo não carregar -->
+          <div v-if="logoError" class="logo-fallback">
+            <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg" class="me-2">
+              <rect width="40" height="40" rx="8" fill="rgba(255,255,255,0.1)" stroke="rgba(255,255,255,0.2)" stroke-width="1"/>
+              <path d="M10 15h20v2H10zm0 4h18v2H10zm0 4h16v2H10zm0 4h14v2H10z" fill="white" opacity="0.9"/>
+              <circle cx="30" cy="30" r="4" fill="#06b6d4"/>
+              <path d="M27 30l2 2 4-4" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            <span>Sistema de Processos</span>
+          </div>
+        </div>
         <div>
           <button @click="mostrarFormulario = !mostrarFormulario" class="btn btn-light">
-            {{ mostrarFormulario ? 'Voltar à Lista' : 'Novo Processo' }}
+            {{ mostrarFormulario ? '← Voltar à Lista' : '+ Novo Processo' }}
           </button>
         </div>
       </div>
     </nav>
 
-    <div class="container mt-4">
+    <div class="container mt-5">
       <!-- Formulário de cadastro/edição -->
       <div v-if="mostrarFormulario" class="card">
-        <div class="card-header bg-primary text-white">
-          {{ processoSelecionado ? 'Editar Processo' : 'Novo Processo' }}
+        <div class="card-header">
+          <span v-if="processoSelecionado">✏️ Editar Processo</span>
+          <span v-else>➕ Novo Processo</span>
         </div>
         <div class="card-body">
           <form @submit.prevent="salvarProcesso">
-            <div class="row">
-              <div class="col-md-4 mb-3">
-                <label for="numero_processo" class="form-label">Nº do Processo</label>
-                <input type="text" class="form-control" id="numero_processo" v-model="formProcesso.numero_processo" required>
-              </div>
-              <div class="col-md-4 mb-3">
-                <label for="data_entrada" class="form-label">Data de Entrada</label>
-                <input type="date" class="form-control" id="data_entrada" v-model="formProcesso.data_entrada">
-              </div>
-              <div class="col-md-4 mb-3">
-                <label for="competencia" class="form-label">Competência</label>
-                <input type="text" class="form-control" id="competencia" v-model="formProcesso.competencia">
+            <!-- Seção: Identificação -->
+            <div class="form-section">
+              <h5>🔍 Identificação do Processo</h5>
+              <div class="row">
+                <div class="col-md-4 mb-3">
+                  <label for="numero_processo" class="form-label">Nº do Processo</label>
+                  <input type="text" class="form-control" id="numero_processo" v-model="formProcesso.numero_processo" required>
+                </div>
+                <div class="col-md-4 mb-3">
+                  <label for="data_entrada" class="form-label">Data de Entrada</label>
+                  <input type="date" class="form-control" id="data_entrada" v-model="formProcesso.data_entrada">
+                </div>
+                <div class="col-md-4 mb-3">
+                  <label for="competencia" class="form-label">Competência</label>
+                  <select class="form-control" id="competencia" v-model="formProcesso.competencia">
+                    <option value="">Selecione um mês</option>
+                    <option v-for="mes in meses" :key="mes" :value="mes">{{ mes }}</option>
+                  </select>
+                </div>
               </div>
             </div>
-            
-            <div class="row">
-              <div class="col-md-6 mb-3">
-                <label for="objeto" class="form-label">Objeto</label>
-                <div class="position-relative" ref="objetoContainer">
-                  <div class="input-group">
-                    <input 
-                      type="text" 
-                      class="form-control" 
-                      id="objeto" 
-                      v-model="formProcesso.objeto" 
-                      readonly
-                      @click="toggleOpcoesObjeto"
-                      placeholder="Selecione um objeto..."
-                    >
-                    <button 
-                      type="button" 
-                      class="btn btn-outline-secondary"
-                      @click="toggleOpcoesObjeto"
-                    >
-                      ⌄
-                    </button>
-                  </div>
-                  
-                  <div v-if="mostrarOpcoesObjeto" class="dropdown-menu show w-100 mt-1" style="max-height: 300px; overflow-y: auto;">
-                    <div class="px-3 py-2">
+
+            <!-- Seção: Detalhes -->
+            <div class="form-section">
+              <h5>📝 Detalhes do Processo</h5>
+              <div class="row">
+                <div class="col-md-6 mb-3">
+                  <label for="objeto" class="form-label">Objeto</label>
+                  <div class="position-relative" ref="objetoContainer">
+                    <div class="input-group">
                       <input 
                         type="text" 
-                        class="form-control form-control-sm" 
-                        placeholder="Buscar objeto..."
-                        v-model="buscaObjeto"
-                        ref="buscaObjetoInput"
+                        class="form-control" 
+                        id="objeto" 
+                        v-model="formProcesso.objeto" 
+                        readonly
+                        @click="toggleOpcoesObjeto"
+                        placeholder="Selecione um objeto..."
                       >
+                      <button 
+                        type="button" 
+                        class="btn btn-outline-secondary"
+                        @click="toggleOpcoesObjeto"
+                      >
+                        ⌄
+                      </button>
                     </div>
-                    <div class="dropdown-divider"></div>
-                    <button 
-                      type="button"
-                      class="dropdown-item"
-                      v-for="objeto in objetosFiltrados"
-                      :key="objeto"
-                      @click="selecionarObjeto(objeto)"
-                    >
-                      {{ objeto }}
-                    </button>
-                    <div v-if="objetosFiltrados.length === 0" class="dropdown-item-text text-muted">
-                      Nenhum objeto encontrado
+                    
+                    <div v-if="mostrarOpcoesObjeto" class="dropdown-menu show w-100 mt-1" style="max-height: 300px; overflow-y: auto;">
+                      <div class="px-3 py-2">
+                        <input 
+                          type="text" 
+                          class="form-control form-control-sm" 
+                          placeholder="🔍 Buscar objeto..."
+                          v-model="buscaObjeto"
+                          ref="buscaObjetoInput"
+                        >
+                      </div>
+                      <div class="dropdown-divider"></div>
+                      <button 
+                        type="button"
+                        class="dropdown-item"
+                        v-for="objeto in objetosFiltrados"
+                        :key="objeto"
+                        @click="selecionarObjeto(objeto)"
+                      >
+                        {{ objeto }}
+                      </button>
+                      <div v-if="objetosFiltrados.length === 0" class="dropdown-item-text text-muted">
+                        Nenhum objeto encontrado
+                      </div>
                     </div>
                   </div>
                 </div>
+                <div class="col-md-6 mb-3">
+                  <label for="interessado" class="form-label">Interessado</label>
+                  <input type="text" class="form-control" id="interessado" v-model="formProcesso.interessado" placeholder="Nome do interessado">
+                </div>
               </div>
-              <div class="col-md-6 mb-3">
-                <label for="interessado" class="form-label">Interessado</label>
-                <input type="text" class="form-control" id="interessado" v-model="formProcesso.interessado">
+              
+              <div class="row">
+                <div class="col-md-12 mb-3">
+                  <label for="observacao" class="form-label">Observação</label>
+                  <textarea class="form-control" id="observacao" v-model="formProcesso.observacao" rows="3" placeholder="Observação adicional..."></textarea>
+                </div>
+              </div>
+            </div>
+
+            <!-- Seção: Responsabilidade -->
+            <div class="form-section">
+              <h5>👥 Responsabilidade e Localização</h5>
+              <div class="row">
+                <div class="col-md-4 mb-3">
+                  <label for="orgao_gerador" class="form-label">Órgão Gerador</label>
+                  <input type="text" class="form-control" id="orgao_gerador" v-model="formProcesso.orgao_gerador" placeholder="Órgão responsável">
+                </div>
+                <div class="col-md-4 mb-3">
+                  <label for="responsavel" class="form-label">Responsável</label>
+                  <input type="text" class="form-control" id="responsavel" v-model="formProcesso.responsavel" placeholder="Nome do responsável">
+                </div>
+                <div class="col-md-4 mb-3">
+                  <label for="setor_atual" class="form-label">Setor Atual</label>
+                  <select class="form-control" id="setor_atual" v-model="formProcesso.setor_atual">
+                    <option value="">Selecione um setor</option>
+                    <option v-for="setor in setores" :key="setor" :value="setor">{{ setor }}</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            <!-- Seção: Valores -->
+            <div class="form-section">
+              <h5>💰 Valores Financeiros</h5>
+              <div class="row">
+                <div class="col-md-3 mb-3">
+                  <label for="valor_convenio" class="form-label">Valor Convênio</label>
+                  <div class="input-group">
+                    <span class="input-group-text">R$</span>
+                    <input type="number" step="0.01" min="0" class="form-control" id="valor_convenio" v-model="formProcesso.valor_convenio" placeholder="0,00">
+                  </div>
+                </div>
+                <div class="col-md-3 mb-3">
+                  <label for="valor_recurso_proprio" class="form-label">Recurso Próprio</label>
+                  <div class="input-group">
+                    <span class="input-group-text">R$</span>
+                    <input type="number" step="0.01" min="0" class="form-control" id="valor_recurso_proprio" v-model="formProcesso.valor_recurso_proprio" placeholder="0,00">
+                  </div>
+                </div>
+                <div class="col-md-3 mb-3">
+                  <label for="valor_royalties" class="form-label">Valor Royalties</label>
+                  <div class="input-group">
+                    <span class="input-group-text">R$</span>
+                    <input type="number" step="0.01" min="0" class="form-control" id="valor_royalties" v-model="formProcesso.valor_royalties" placeholder="0,00">
+                  </div>
+                </div>
+                <div class="col-md-3 mb-3">
+                  <label for="total" class="form-label">Total</label>
+                  <div class="input-group">
+                    <span class="input-group-text">R$</span>
+                    <input type="text" class="form-control" id="total" :value="totalCalculado.toLocaleString('pt-BR', {minimumFractionDigits: 2})" readonly style="background-color: #e8f5e8; font-weight: bold;">
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Seção: Descrição -->
+            <div class="form-section">
+              <h5>📋 Descrição</h5>
+              <div class="row">
+                <div class="col-md-12 mb-3">
+                  <label for="descricao" class="form-label">Descrição</label>
+                  <textarea class="form-control" id="descricao" v-model="formProcesso.descricao" rows="3" placeholder="Descreva os detalhes do processo..."></textarea>
+                </div>
+              </div>
+              
+              <div class="form-check mb-4">
+                <input class="form-check-input" type="checkbox" id="concluido" v-model="formProcesso.concluido">
+                <label class="form-check-label" for="concluido">
+                  <strong>✅ Processo concluído/Tramitado</strong>
+                </label>
               </div>
             </div>
             
-            <div class="row">
-              <div class="col-md-4 mb-3">
-                <label for="orgao_gerador" class="form-label">Órgão Gerador</label>
-                <input type="text" class="form-control" id="orgao_gerador" v-model="formProcesso.orgao_gerador">
+            <div class="d-flex justify-content-between align-items-center pt-3 border-top">
+              <button type="submit" class="btn btn-primary">
+                {{ processoSelecionado ? '💾 Atualizar' : '💾 Salvar' }} Processo
+              </button>
+              <div>
+                <button type="button" class="btn btn-secondary me-2" @click="limparFormulario">🗑️ Limpar</button>
+                <button type="button" class="btn btn-danger" @click="mostrarFormulario = false">❌ Cancelar</button>
               </div>
-              <div class="col-md-4 mb-3">
-                <label for="responsavel" class="form-label">Responsável</label>
-                <input type="text" class="form-control" id="responsavel" v-model="formProcesso.responsavel">
-              </div>
-              <div class="col-md-4 mb-3">
-                <label for="setor_atual" class="form-label">Setor Atual</label>
-                <select class="form-control" id="setor_atual" v-model="formProcesso.setor_atual">
-                  <option value="">Selecione um setor</option>
-                  <option v-for="setor in setores" :key="setor" :value="setor">{{ setor }}</option>
-                </select>
-              </div>
-            </div>
-            
-            <div class="row">
-              <div class="col-md-12 mb-3">
-                <label for="descricao" class="form-label">Descrição</label>
-                <textarea class="form-control" id="descricao" v-model="formProcesso.descricao" rows="2"></textarea>
-              </div>
-            </div>
-            
-            <div class="row">
-              <div class="col-md-12 mb-3">
-                <label for="observacao" class="form-label">Observação</label>
-                <textarea class="form-control" id="observacao" v-model="formProcesso.observacao" rows="2"></textarea>
-              </div>
-            </div>
-            
-            <div class="row">
-              <div class="col-md-3 mb-3">
-                <label for="valor_convenio" class="form-label">Valor Convênio (R$)</label>
-                <input type="number" step="0.01" min="0" class="form-control" id="valor_convenio" v-model="formProcesso.valor_convenio" placeholder="0,00">
-              </div>
-              <div class="col-md-3 mb-3">
-                <label for="valor_recurso_proprio" class="form-label">Valor Recurso Próprio (R$)</label>
-                <input type="number" step="0.01" min="0" class="form-control" id="valor_recurso_proprio" v-model="formProcesso.valor_recurso_proprio" placeholder="0,00">
-              </div>
-              <div class="col-md-3 mb-3">
-                <label for="valor_royalties" class="form-label">Valor Royalties (R$)</label>
-                <input type="number" step="0.01" min="0" class="form-control" id="valor_royalties" v-model="formProcesso.valor_royalties" placeholder="0,00">
-              </div>
-              <div class="col-md-3 mb-3">
-                <label for="total" class="form-label">Total (R$)</label>
-                <input type="number" step="0.01" class="form-control" id="total" :value="totalCalculado.toFixed(2)" readonly>
-              </div>
-            </div>
-            
-            <div class="form-check mb-3">
-              <input class="form-check-input" type="checkbox" id="concluido" v-model="formProcesso.concluido">
-              <label class="form-check-label" for="concluido">
-                Processo concluído/Tramitado
-              </label>
-            </div>
-            
-            <div class="d-flex justify-content-between">
-              <button type="submit" class="btn btn-primary">Salvar</button>
-              <button type="button" class="btn btn-secondary" @click="limparFormulario">Limpar</button>
-              <button type="button" class="btn btn-danger" @click="mostrarFormulario = false">Cancelar</button>
             </div>
           </form>
         </div>
@@ -173,18 +236,125 @@
 
       <!-- Lista de processos -->
       <div v-else>
+        <!-- Busca -->
         <div class="card mb-4">
-          <div class="card-header bg-primary text-white">
-            Busca de Processos
+          <div class="card-header d-flex justify-content-between align-items-center">
+            <span>🔍 Busca de Processos</span>
+            <button 
+              class="btn btn-outline-light btn-sm" 
+              @click="toggleFiltros"
+              :class="{ 'btn-warning': filtrosAtivos }"
+            >
+              Filtros
+              <span v-if="contadorFiltros > 0" class="badge bg-light text-primary ms-1">{{ contadorFiltros }}</span>
+            </button>
           </div>
           <div class="card-body">
             <div class="input-group mb-3">
-              <input type="text" class="form-control" placeholder="Buscar processo..." v-model="termoBusca" @keyup.enter="buscarProcessos">
+              <input 
+                type="text" 
+                class="form-control" 
+                placeholder="Buscar por número, interessado, objeto ou setor..." 
+                v-model="termoBusca" 
+                @keyup.enter="buscarProcessos"
+              >
               <button class="btn btn-primary" type="button" @click="buscarProcessos">Buscar</button>
+            </div>
+
+            <!-- Seção de Filtros -->
+            <div v-show="mostrarFiltros" class="border-top pt-3 mt-3">
+              <div class="row">
+                <div class="col-md-6 col-lg-3 mb-3">
+                  <label class="form-label">Status</label>
+                  <select class="form-control" v-model="filtros.status" @change="aplicarFiltros">
+                    <option value="">Todos</option>
+                    <option value="andamento">Em andamento</option>
+                    <option value="concluido">Concluído</option>
+                  </select>
+                </div>
+
+                <div class="col-md-6 col-lg-3 mb-3">
+                  <label class="form-label">Setor</label>
+                  <select class="form-control" v-model="filtros.setor" @change="aplicarFiltros">
+                    <option value="">Todos os setores</option>
+                    <option v-for="setor in setores" :key="setor" :value="setor">{{ setor }}</option>
+                  </select>
+                </div>
+
+                <div class="col-md-6 col-lg-3 mb-3">
+                  <label class="form-label">Competência</label>
+                  <select class="form-control" v-model="filtros.competencia" @change="aplicarFiltros">
+                    <option value="">Todas</option>
+                    <option v-for="comp in competenciasDisponiveis" :key="comp" :value="comp">{{ comp }}</option>
+                  </select>
+                </div>
+
+                <div class="col-md-6 col-lg-3 mb-3">
+                  <label class="form-label">Período</label>
+                  <div class="d-flex gap-2">
+                    <input 
+                      type="date" 
+                      class="form-control form-control-sm" 
+                      v-model="filtros.data_inicio" 
+                      @change="aplicarFiltros"
+                      title="Data início"
+                    >
+                    <input 
+                      type="date" 
+                      class="form-control form-control-sm" 
+                      v-model="filtros.data_fim" 
+                      @change="aplicarFiltros"
+                      title="Data fim"
+                    >
+                  </div>
+                </div>
+              </div>
+
+              <div class="d-flex justify-content-between align-items-center">
+                <small class="text-muted">
+                  {{ processos.length }} processo(s) encontrado(s)
+                  <span v-if="filtrosAtivos">com filtros aplicados</span>
+                </small>
+                <button 
+                  v-if="filtrosAtivos" 
+                  class="btn btn-outline-secondary btn-sm" 
+                  @click="limparFiltros"
+                >
+                  Limpar Filtros
+                </button>
+              </div>
             </div>
           </div>
         </div>
 
+        <!-- Indicadores de Filtros Ativos -->
+        <div v-if="filtrosAtivos && !mostrarFiltros" class="mb-3">
+          <div class="d-flex flex-wrap gap-2 align-items-center">
+            <small class="text-muted me-2">Filtros ativos:</small>
+            
+            <span v-if="filtros.status" class="badge bg-info">
+              Status: {{ filtros.status === 'concluido' ? 'Concluído' : 'Em andamento' }}
+            </span>
+            
+            <span v-if="filtros.setor" class="badge bg-info">
+              Setor: {{ filtros.setor }}
+            </span>
+            
+            <span v-if="filtros.competencia" class="badge bg-info">
+              Competência: {{ filtros.competencia }}
+            </span>
+            
+            <span v-if="filtros.data_inicio || filtros.data_fim" class="badge bg-info">
+              Período: {{ filtros.data_inicio || '...' }} até {{ filtros.data_fim || '...' }}
+            </span>
+
+            <button class="btn btn-outline-secondary btn-sm ms-2" @click="limparFiltros">
+              ❌ Limpar
+            </button>
+          </div>
+        </div>
+
+        <!-- Tabela -->
         <div class="table-responsive">
           <table class="table table-striped table-hover">
             <thead>
@@ -201,15 +371,15 @@
             </thead>
             <tbody>
               <tr v-for="processo in processos" :key="processo.id" :class="{ 'table-success': processo.concluido }">
-                <td>{{ processo.numero_processo }}</td>
+                <td><strong>{{ processo.numero_processo }}</strong></td>
                 <td>{{ formatarData(processo.data_entrada) }}</td>
-                <td>{{ processo.interessado }}</td>
-                <td>{{ processo.objeto }}</td>
-                <td>{{ processo.setor_atual }}</td>
-                <td>{{ processo.responsavel }}</td>
+                <td>{{ processo.interessado || '-' }}</td>
+                <td>{{ processo.objeto || '-' }}</td>
+                <td>{{ processo.setor_atual || '-' }}</td>
+                <td>{{ processo.responsavel || '-' }}</td>
                 <td>
-                  <span v-if="processo.concluido" class="badge bg-success">Concluído</span>
-                  <span v-else class="badge bg-warning text-dark">Em andamento</span>
+                  <span v-if="processo.concluido" class="badge bg-success">✅ Concluído</span>
+                  <span v-else class="badge bg-warning text-dark">⏳ Em andamento</span>
                 </td>
                 <td>
                   <button @click="editarProcesso(processo)" class="btn btn-sm btn-primary me-1">Editar</button>
@@ -217,7 +387,10 @@
                 </td>
               </tr>
               <tr v-if="processos.length === 0">
-                <td colspan="8" class="text-center">Nenhum processo encontrado</td>
+                <td colspan="8" class="text-center text-muted py-4">
+                  <div>📭</div>
+                  <div>Nenhum processo encontrado</div>
+                </td>
               </tr>
             </tbody>
           </table>

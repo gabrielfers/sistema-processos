@@ -6,6 +6,10 @@ new Vue({
     processoSelecionado: null,
     termoBusca: '',
     setores: ['Gabinete', 'Contabilidade', 'Controle Interno', 'Financeiro'],
+    meses: [
+      'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
+      'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'
+    ],
     objetos: [
       'Adiantamento',
       'Aluguel Imóveis',
@@ -41,7 +45,17 @@ new Vue({
       valor_royalties: '',
       total: 0,
       concluido: false
-    }
+    },
+    filtros: {
+      status: '',
+      setor: '',
+      competencia: '',
+      data_inicio: '',
+      data_fim: ''
+    },
+    mostrarFiltros: false,
+    competenciasDisponiveis: [],
+    logoError: false
   },
   computed: {
     totalCalculado() {
@@ -55,6 +69,12 @@ new Vue({
       return this.objetos.filter(objeto => 
         objeto.toLowerCase().includes(this.buscaObjeto.toLowerCase())
       );
+    },
+    filtrosAtivos() {
+      return Object.values(this.filtros).some(filtro => filtro !== '');
+    },
+    contadorFiltros() {
+      return Object.values(this.filtros).filter(filtro => filtro !== '').length;
     }
   },
   watch: {
@@ -64,6 +84,7 @@ new Vue({
   },
   mounted() {
     this.carregarProcessos();
+    this.carregarCompetencias();
     // Fechar dropdown ao clicar fora
     document.addEventListener('click', (e) => {
       if (!this.$refs.objetoContainer || !this.$refs.objetoContainer.contains(e.target)) {
@@ -74,14 +95,46 @@ new Vue({
   methods: {
     async carregarProcessos() {
       try {
-        const response = await axios.get('/api/processos');
+        let url = '/api/processos';
+        const params = new URLSearchParams();
+
+        // Adicionar busca se existir
+        if (this.termoBusca.trim()) {
+          params.append('busca', this.termoBusca);
+        }
+
+        // Adicionar filtros
+        Object.keys(this.filtros).forEach(key => {
+          if (this.filtros[key]) {
+            params.append(key, this.filtros[key]);
+          }
+        });
+
+        if (params.toString()) {
+          url += `?${params.toString()}`;
+        }
+
+        const response = await axios.get(url);
         this.processos = response.data;
       } catch (error) {
         console.error('Erro ao carregar processos:', error);
         alert('Erro ao carregar processos: ' + (error.response?.data?.error || error.message));
       }
     },
-    
+
+    async carregarCompetencias() {
+      try {
+        const response = await axios.get('/api/processos');
+        const competencias = [...new Set(response.data
+          .map(p => p.competencia)
+          .filter(c => c && c.trim() !== '')
+        )].sort();
+        this.competenciasDisponiveis = competencias;
+      } catch (error) {
+        console.error('Erro ao carregar competências:', error);
+      }
+    },
+
     async salvarProcesso() {
       try {
         // Validação no frontend
@@ -167,17 +220,27 @@ new Vue({
       }
     },
     
-    async buscarProcessos() {
-      try {
-        let url = '/api/processos';
-        if (this.termoBusca.trim()) {
-          url += `?busca=${encodeURIComponent(this.termoBusca)}`;
-        }
-        const response = await axios.get(url);
-        this.processos = response.data;
-      } catch (error) {
-        alert('Erro ao buscar processos: ' + (error.response?.data?.error || error.message));
-      }
+    aplicarFiltros() {
+      this.carregarProcessos();
+    },
+
+    limparFiltros() {
+      this.filtros = {
+        status: '',
+        setor: '',
+        competencia: '',
+        data_inicio: '',
+        data_fim: ''
+      };
+      this.carregarProcessos();
+    },
+
+    toggleFiltros() {
+      this.mostrarFiltros = !this.mostrarFiltros;
+    },
+
+    buscarProcessos() {
+      this.carregarProcessos();
     },
     
     selecionarObjeto(objeto) {
@@ -222,6 +285,10 @@ new Vue({
       if (!data) return '';
       const date = new Date(data);
       return date.toLocaleDateString('pt-BR');
+    },
+    
+    handleLogoError() {
+      this.logoError = true;
     }
   }
 });

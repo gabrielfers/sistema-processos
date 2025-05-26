@@ -4,20 +4,47 @@ const db = require('../db');
 
 // GET - Listar todos os processos ou buscar por termo
 router.get('/', (req, res) => {
-  const { busca } = req.query;
-  let sql = 'SELECT * FROM processos ORDER BY data_entrada DESC';
+  const { busca, status, setor, competencia, data_inicio, data_fim } = req.query;
+  let sql = 'SELECT * FROM processos WHERE 1=1';
   let params = [];
 
+  // Filtro por busca geral
   if (busca) {
-    sql = `SELECT * FROM processos 
-           WHERE numero_processo LIKE ? 
-           OR interessado LIKE ? 
-           OR objeto LIKE ? 
-           OR setor_atual LIKE ?
-           ORDER BY data_entrada DESC`;
+    sql += ` AND (numero_processo LIKE ? OR interessado LIKE ? OR objeto LIKE ? OR setor_atual LIKE ?)`;
     const termoBusca = `%${busca}%`;
-    params = [termoBusca, termoBusca, termoBusca, termoBusca];
+    params.push(termoBusca, termoBusca, termoBusca, termoBusca);
   }
+
+  // Filtro por status
+  if (status !== undefined && status !== '') {
+    sql += ` AND concluido = ?`;
+    params.push(status === 'concluido' ? 1 : 0);
+  }
+
+  // Filtro por setor
+  if (setor) {
+    sql += ` AND setor_atual = ?`;
+    params.push(setor);
+  }
+
+  // Filtro por competência
+  if (competencia) {
+    sql += ` AND competencia = ?`;
+    params.push(competencia);
+  }
+
+  // Filtro por período de data
+  if (data_inicio) {
+    sql += ` AND data_entrada >= ?`;
+    params.push(data_inicio);
+  }
+
+  if (data_fim) {
+    sql += ` AND data_entrada <= ?`;
+    params.push(data_fim);
+  }
+
+  sql += ` ORDER BY data_entrada DESC`;
 
   db.all(sql, params, (err, rows) => {
     if (err) {
