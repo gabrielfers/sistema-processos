@@ -263,11 +263,10 @@
             <div v-show="mostrarFiltros" class="border-top pt-3 mt-3">
               <div class="row">
                 <div class="col-md-6 col-lg-3 mb-3">
-                  <label class="form-label">Status</label>
-                  <select class="form-control" v-model="filtros.status" @change="aplicarFiltros">
-                    <option value="">Todos</option>
-                    <option value="andamento">Em andamento</option>
-                    <option value="concluido">Concluído</option>
+                  <label class="form-label">Objeto</label>
+                  <select class="form-control" v-model="filtros.objeto" @change="aplicarFiltros">
+                    <option value="">Todos os objetos</option>
+                    <option v-for="objeto in objetosDisponiveis" :key="objeto" :value="objeto">{{ objeto }}</option>
                   </select>
                 </div>
 
@@ -280,10 +279,11 @@
                 </div>
 
                 <div class="col-md-6 col-lg-3 mb-3">
-                  <label class="form-label">Competência</label>
-                  <select class="form-control" v-model="filtros.competencia" @change="aplicarFiltros">
-                    <option value="">Todas</option>
-                    <option v-for="comp in competenciasDisponiveis" :key="comp" :value="comp">{{ comp }}</option>
+                  <label class="form-label">Status</label>
+                  <select class="form-control" v-model="filtros.status" @change="aplicarFiltros">
+                    <option value="">Todos</option>
+                    <option value="andamento">Em andamento</option>
+                    <option value="concluido">Concluído</option>
                   </select>
                 </div>
 
@@ -330,16 +330,16 @@
           <div class="d-flex flex-wrap gap-2 align-items-center">
             <small class="text-muted me-2">Filtros ativos:</small>
             
-            <span v-if="filtros.status" class="badge bg-info">
-              Status: {{ filtros.status === 'concluido' ? 'Concluído' : 'Em andamento' }}
+            <span v-if="filtros.objeto" class="badge bg-info">
+              Objeto: {{ filtros.objeto }}
             </span>
             
             <span v-if="filtros.setor" class="badge bg-info">
               Setor: {{ filtros.setor }}
             </span>
             
-            <span v-if="filtros.competencia" class="badge bg-info">
-              Competência: {{ filtros.competencia }}
+            <span v-if="filtros.status" class="badge bg-info">
+              Status: {{ filtros.status === 'concluido' ? 'Concluído' : 'Em andamento' }}
             </span>
             
             <span v-if="filtros.data_inicio || filtros.data_fim" class="badge bg-info">

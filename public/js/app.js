@@ -49,12 +49,12 @@ new Vue({
     filtros: {
       status: '',
       setor: '',
-      competencia: '',
+      objeto: '',
       data_inicio: '',
       data_fim: ''
     },
     mostrarFiltros: false,
-    competenciasDisponiveis: [],
+    objetosDisponiveis: [],
     logoError: false
   },
   computed: {
@@ -84,7 +84,7 @@ new Vue({
   },
   mounted() {
     this.carregarProcessos();
-    this.carregarCompetencias();
+    this.carregarObjetos();
     // Fechar dropdown ao clicar fora
     document.addEventListener('click', (e) => {
       if (!this.$refs.objetoContainer || !this.$refs.objetoContainer.contains(e.target)) {
@@ -122,16 +122,16 @@ new Vue({
       }
     },
 
-    async carregarCompetencias() {
+    async carregarObjetos() {
       try {
         const response = await axios.get('http://localhost:3000/processos');
-        const competencias = [...new Set(response.data
-          .map(p => p.competencia)
-          .filter(c => c && c.trim() !== '')
+        const objetos = [...new Set(response.data
+          .map(p => p.objeto)
+          .filter(o => o && o.trim() !== '')
         )].sort();
-        this.competenciasDisponiveis = competencias;
+        this.objetosDisponiveis = objetos;
       } catch (error) {
-        console.error('Erro ao carregar competências:', error);
+        console.error('Erro ao carregar objetos:', error);
       }
     },
 
@@ -228,7 +228,7 @@ new Vue({
       this.filtros = {
         status: '',
         setor: '',
-        competencia: '',
+        objeto: '',
         data_inicio: '',
         data_fim: ''
       };
